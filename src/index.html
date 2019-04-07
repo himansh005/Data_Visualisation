@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Air Quality Indicators</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+	   integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+	   crossorigin=""/>
+   	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+	   integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+	   crossorigin=""></script>
+
+	<script src="https://unpkg.com/esri-leaflet@2.2.4/dist/esri-leaflet.js"
+	    integrity="sha512-tyPum7h2h36X52O2gz+Pe8z/3l+Y9S1yEUscbVs5r5aEY5dFmP1WWRY/WLLElnFHa+k1JBQZSCDGwEAnm2IxAQ=="
+	    crossorigin=""></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder@2.2.13/dist/esri-leaflet-geocoder.css"
+	    integrity="sha512-v5YmWLm8KqAAmg5808pETiccEohtt8rPVMGQ1jA6jqkWVydV5Cuz3nJ9fQ7ittSxvuqsvI9RSGfVoKPaAJZ/AQ=="
+	    crossorigin="">
+	<script src="https://unpkg.com/esri-leaflet-geocoder@2.2.13/dist/esri-leaflet-geocoder.js"
+	    integrity="sha512-zdT4Pc2tIrc6uoYly2Wp8jh6EPEWaveqqD3sT0lf5yei19BC1WulGuh5CesB0ldBKZieKGD7Qyf/G0jdSe016A=="
+	    crossorigin=""></script>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+ 	<link rel="stylesheet" href="css/main.css">
+ 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-search@d4cbd36122efc8d17152b4177ed0e12165305441/dist/css/L.Control.OpenCageData.Search.min.css" />
+
+<script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-search@d4cbd36122efc8d17152b4177ed0e12165305441/dist/js/L.Control.OpenCageSearch.min.js"></script>
+
+ 	<style type="text/css">
+ 		#mapSearchContainer{
+  position:fixed;
+  top:20px;
+  right: 40px;
+  height:30px;
+  width:180px;
+  z-index:110;
+  font-size:10pt;
+  color:#5d5d5d;
+  border:solid 1px #bbb;
+  background-color:#f8f8f8;
+}
+.pointer{
+  position:absolute;
+  top:86px;
+  left:60px;
+  z-index:99999;
+}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+</style>
+ 	</style>
+
+</head>
+<body>
+	<div class="header">
+  <a href="#default" class="logo">Dashboard</a>
+  <div class="header-right">
+    <a class="active" href="#home">Home</a>
+    <a href="#contact">Logout</a>
+    <a href="#about">About</a>
+  </div>
+</div>
+	<div class="tab">
+	  <button class="tablinks" onclick="openCity(event, 'London')">City View</button>
+	  <button class="tablinks" onclick="openCity(event, 'Paris')">Global Analysis</button>
+	  <button class="tablinks" onclick="openCity(event, 'Tokyo')">Settings</button>
+	  <button id="statuss" class="tablinks" style="float: right;background-color: black;color: grey;">Disconnected</button>
+	</div>
+	<div id="London" class="tabcontent" style="display: block;">
+
+	
+	<br><hr
+	>Select City for AQI:  <select id="mySelect" onchange="queryNow()" class="styled-select slate"></select><br><hr>
+	<div id="body" style="margin-top: 1%;height: 670px;">
+		<div id="mapArea" title="Pick a city">
+			Map Area
+	</div>
+
+
+	<div id="chartArea" >
+			<div id="status">
+				<div id="city" style="font-size:16px;font-weight:bold;display: inline-block;box-align:left;width: 50%;padding: 20px; ">
+					City Name
+				</div>
+				<div id="time" style="display: inline;">
+						Last Updated:
+					</div>
+				
+			</div>
+			<div style="display: block;margin: 20px;background-color: rgba(0,0,0,0.1);height: 80%; margin-top: -2px;">
+				<div id="top_x_div" style="width: 100%; height: 500px;text-align: center; "><p style="margin-top: 30%;margin-left:33%;color: grey;float: left;">Nothing to Display Here</p></div>
+
+				<div id="main" style="width: 90%;height: 150px; margin-top: -180px;">
+					<p style="margin-top: 30%;margin-left:33%;color: grey;float: left;">Nothing to Display Here</p></div>
+				</div>
+			</div>
+		</div>
+	</div>
+		
+
+
+  
+
+
+
+
+
+  
+</div>
+
+<div id="Paris" class="tabcontent">
+	<br><hr>
+  Select Parameter: <select class="styled-select slate" id="mySelect2" onchange="queryNow2()">
+  
+  <option value="CO">CO</option>
+  <option value="NO2">NO2</option>
+  <option value="SO2">SO2</option>
+  <option value="O3">O3</option>
+  <option value="PM25">PM2.5</option>
+  <option value="PM10">PM10</option>
+  <option value="NH3">NH3</option>
+  <option value="AQI">AQI</option>
+
+</select>
+<br><hr>
+<div style="width: 100%">
+<div id="myDiv" style="margin:50px;float: left;width: 40%;">
+	
+</div>
+<div id="main2" style="margin:50px;float: left;width: 40%;">
+	
+</div>
+</div>
+
+<div id="Tokyo" class="tabcontent">
+  <h3>Page Not Found</h3>
+  
+</div>
+
+<script>
+function openCity(evt, cityName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+</script>
+
+
+
+</body>
+</html>
